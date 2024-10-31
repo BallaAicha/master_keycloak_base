@@ -1,0 +1,54 @@
+version: '3'
+services:
+  postgres:
+    image: postgres:latest
+    ports:
+      - "5432:5432"
+    restart: always
+    volumes:
+      - ./pgdata:/var/lib/postgresql/data #c'est le chemin où les données de la base de données seront stockées
+    environment:
+      POSTGRES_DB: keycloak
+      POSTGRES_USER: keycloak
+      POSTGRES_PASSWORD: password
+    networks:
+      - local
+  mailhog:
+    image: mailhog/mailhog:latest
+    ports:
+      - "8025:8025" # Web interface
+      - "1025:1025" # SMTP server
+    restart: always
+    networks:
+      - local
+
+
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:25.0.0
+    command: start-dev
+    restart: always
+    links:
+      - postgres
+    ports:
+      - "9082:8080"
+    environment:
+      KEYCLOAK_ADMIN : admin
+      KEYCLOAK_ADMIN_PASSWORD: admin@1234
+      KC_DB: postgres #represents the database type
+      KC_DB_SCHEMA: public #represents the database schema
+      KC_DB_USERNAME: keycloak #represents the database username
+      KC_DB_PASSWORD: password
+      KC_DB_URL: jdbc:postgresql://postgres:5432/keycloak
+      KC_HOSTNAME: localhost #represents the hostname cad the port of the Keycloak server
+      KC_FEATURES: token-exchange,admin-fine-grained-authz #represents the features of Keycloak
+      KEYCLOAK_SMTP_SERVER_HOST: mailhog
+      KEYCLOAK_SMTP_SERVER_PORT: 1025
+      KEYCLOAK_SMTP_SERVER_FROM: example@example.com
+      KEYCLOAK_SMTP_SERVER_FROM_DISPLAY: "Keycloak"
+
+    #      KC_HTTP_RELATIVE_PATH: /keycloak
+    networks:
+      - local
+networks:
+  local:

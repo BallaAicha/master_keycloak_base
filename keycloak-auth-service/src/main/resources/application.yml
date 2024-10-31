@@ -1,0 +1,14 @@
+spring:
+  application:
+    name: keycloak-auth-service
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: "http://localhost:9082/realms/spring" #ceci permet de valider le token cad de vérifier si le token est valide
+
+server:
+  port: 6700
+  servlet:
+    context-path: /auth
+
